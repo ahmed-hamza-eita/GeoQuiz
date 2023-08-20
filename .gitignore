@@ -1,0 +1,6 @@
+password.txt
+*.dmg
+*.exe
+.Trashes
+.DS_store
+.Ds_Store
