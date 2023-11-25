@@ -2,6 +2,8 @@ package com.hamza.geoquiz
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import com.hamza.geoquiz.databinding.ActivityMainBinding
 import com.hamza.geoquiz.models.Questions
 import com.hamza.geoquiz.utils.showToast
@@ -10,16 +12,10 @@ class MainActivity : AppCompatActivity() {
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
-    private val questionBnk = listOf(
-        Questions(R.string.question_australia, true),
-        Questions(R.string.question_oceans, true),
-        Questions(R.string.question_mideast, false),
-        Questions(R.string.question_africa, false),
-        Questions(R.string.question_americas, true),
-        Questions(R.string.question_asia, true),
+    private val quizViewModel: QuizViewModel by lazy {
+        ViewModelProviders.of(this)[QuizViewModel::class.java]
+    }
 
-        )
-    private var currentIndex = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,34 +28,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun actions() {
-        binding.btnTrue.setOnClickListener { checkAnswer(true)
+        binding.btnTrue.setOnClickListener {
+            checkAnswer(true)
             updateQuestionWhenAnswerd()
         }
-        binding.btnFalse.setOnClickListener { checkAnswer(false)
+        binding.btnFalse.setOnClickListener {
+            checkAnswer(false)
             updateQuestionWhenAnswerd()
         }
         binding.btnNext.setOnClickListener {
-            currentIndex = (currentIndex + 1) % questionBnk.size
-            updateQuestionWhenAnswerd()
+           quizViewModel.moveToNext()
+            updateQuestion()
         }
 
     }
 
     private fun updateQuestion() {
 
-        val questionTxtResId = questionBnk[currentIndex].textResId
+        val questionTxtResId = quizViewModel.currentQuestionText
         binding.txtQuestion.setText(questionTxtResId)
     }
 
     private fun updateQuestionWhenAnswerd() {
-        currentIndex = (currentIndex + 1) % questionBnk.size
 
-        val questionTxtResId = questionBnk[currentIndex].textResId
+
+        val questionTxtResId = quizViewModel.currentQuestionText
         binding.txtQuestion.setText(questionTxtResId)
     }
 
     private fun checkAnswer(userAnswer: Boolean) {
-        val correctAnswer = questionBnk[currentIndex].answers
+        val correctAnswer = quizViewModel.currentQuestionAnswer
         if (userAnswer == correctAnswer) {
             showToast("Correct Answer")
 
@@ -68,7 +66,7 @@ class MainActivity : AppCompatActivity() {
 
 
         }
-     }
+    }
 
     override fun onDestroy() {
         super.onDestroy()
